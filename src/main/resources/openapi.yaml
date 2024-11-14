@@ -1,0 +1,241 @@
+openapi: 3.0.1
+info:
+  title: API Business Account V1
+  description: API for managing bank accounts associated with customers.
+  version: 1.0.0
+tags:
+  - name: AccountController
+    description: Account Controller
+paths:
+  /accounts:
+    post:
+      tags:
+        - AccountController
+      summary: Create a bank account for a customer
+      parameters:
+        - $ref: '#/components/parameters/RequestIdHeader'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AccountRequest'
+      responses:
+        '201':
+          description: Bank account successfully created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CreateAccountResponse'
+        '400':
+          description: Invalid request
+        '500':
+          description: Internal server error
+
+    get:
+      tags:
+        - AccountController
+      summary: List all bank accounts
+      parameters:
+        - $ref: '#/components/parameters/RequestIdHeader'
+      responses:
+        '200':
+          description: List of bank accounts
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/AccountResponse'
+        '500':
+          description: Internal server error
+
+  /accounts/{id}:
+    get:
+      tags:
+        - AccountController
+      summary: Get details of a bank account by ID
+      parameters:
+        - $ref: '#/components/parameters/RequestIdHeader'
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Bank account information
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AccountResponse'
+        '404':
+          description: Bank account not found
+        '500':
+          description: Internal server error
+
+    delete:
+      tags:
+        - AccountController
+      summary: Delete a bank account
+      parameters:
+        - $ref: '#/components/parameters/RequestIdHeader'
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '204':
+          description: Bank account successfully deleted
+        '404':
+          description: Bank account not found
+        '500':
+          description: Internal server error
+
+  /accounts/{accountId}/deposit:
+    put:
+      tags:
+        - AccountController
+      summary: Deposit into a bank account
+      parameters:
+        - $ref: '#/components/parameters/RequestIdHeader'
+        - name: accountId
+          in: path
+          required: true
+          schema:
+            type: string
+
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/DepositRequest'
+      responses:
+        '204':
+          description: Bank account successfully deleted
+        '400':
+          description: Invalid deposit request
+        '404':
+          description: Bank account not found
+        '500':
+          description: Internal server error
+
+  /accounts/{accountId}/withdraw:
+    put:
+      tags:
+        - AccountController
+      summary: Withdraw from a bank account
+      parameters:
+        - $ref: '#/components/parameters/RequestIdHeader'
+        - name: accountId
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/WithdrawRequest'
+      responses:
+        '204':
+          description: Bank account successfully deleted
+        '400':
+          description: Invalid withdrawal request
+        '404':
+          description: Bank account not found
+        '500':
+          description: Internal server error
+
+components:
+  parameters:
+    RequestIdHeader:
+      name: request-id
+      in: header
+      required: true
+      schema:
+        type: string
+        example: c47b9a2e-ca08-4f66-9fd8-eace947c6560
+      description: Unique identifier for tracking the request
+  schemas:
+    DepositRequest:
+      type: object
+      properties:
+        amount:
+          type: number
+          format: double
+          description: Amount to withdraw
+    WithdrawRequest:
+      type: object
+      properties:
+        amount:
+          type: number
+          format: double
+          description: Amount to withdraw
+    AccountRequest:
+      type: object
+      properties:
+        customerId:
+          type: string
+          description: Unique ID of the customer who owns the account
+          example: c47b9a2e-ca08-4f66-9fd8-eace947c6560
+        accountType:
+          type: string
+          description: Type of bank account
+          enum: [SAVING, CURRENT]
+        accountNumber:
+          type: string
+          description: Unique account number, automatically generated
+          minLength: 10
+          maxLength: 20
+          pattern: '^[A-Z0-9]+$' # Alphanumeric characters only
+          example: 1931853946025
+        balance:
+          type: number
+          format: double
+          description: Starting balance of the account, default is 0.0
+          minimum: 0.0
+      required:
+        - customerId
+        - accountType
+        - accountNumber
+        - balance
+    CreateAccountResponse:
+      type: object
+      properties:
+        id:
+          type: string
+          description: Unique identifier of the bank account
+          example: c47b9a2e-ca08-4f66-9fd8-eace947c6560
+    AccountResponse:
+      type: object
+      properties:
+        id:
+          type: string
+          description: Unique identifier of the bank account
+          example: c47b9a2e-ca08-4f66-9fd8-eace947c6560
+        accountNumber:
+          type: string
+          description: Unique account number
+          example: 1931853946025
+        balance:
+          type: number
+          format: double
+          description: Balance of the bank account
+        accountType:
+          type: string
+          description: Type of bank account
+          enum: [SAVINGS, CURRENT]
+        customerId:
+          type: string
+          description: Unique ID of the customer who owns the account
+          example: c47b9a2e-ca08-4f66-9fd8-eace947c6560
+      required:
+        - id
+        - accountNumber
+        - balance
+        - accountType
+        - customerId
