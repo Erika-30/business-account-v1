@@ -79,10 +79,10 @@ public class AccountController implements AccountControllerApiDelegate {
 
   @Override
   public ResponseEntity<CreateAccountResponse> accountsPost(String requestId,
-                                                             AccountRequest accountRequest) {
+                                                             AccountRequest request) {
 
     return Optional.of(ResponseEntity.ok(new CreateAccountResponse()
-                    .id(accountService.save(accountRequest).getId().toString())))
+                    .id(accountService.save(request).getId().toString())))
         .orElse(ResponseEntity.notFound().build());
 
   }
